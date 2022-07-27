@@ -22,7 +22,7 @@ C2_ARCH = "x86"
 IDLE_TIME = 5
 
 ENCODER_MODULE = "encoder_b64url"
-TRANSPORT_MODULE = "transport_s3"
+TRANSPORT_MODULE = "transport_gcpstorage"
 
 ###########################################
 # DEBUG: </END GHETTO CONFIG>
