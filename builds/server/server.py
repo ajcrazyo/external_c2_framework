@@ -45,24 +45,24 @@ def createConnection(beaconId):
 
 	if stager_status != 0:
 		# Something went horribly wrong
-		print commonUtils.color("Something went terribly wrong while configuring the stager!", status=False, warning=True)
+		print(commonUtils.color("Something went terribly wrong while configuring the stager!", status=False, warning=True))
 		sys.exit(1)
 	return sock
 
 def taskLoop(sock, beaconId):
 	while True:
 		if config.verbose:
-			print commonUtils.color("Checking the c2 server for {} tasks...".format(beaconId))
+			print(commonUtils.color("Checking the c2 server for {} tasks...".format(beaconId)))
 
 		newTask = establishedSession.checkForTasks(sock)
 
 		# once we have a new task (even an empty one), lets relay that to our client
 		if config.debug:
-			print commonUtils.color("Encoding and relaying task to {}".format(beaconId), status=False, yellow=True)
+			print(commonUtils.color("Encoding and relaying task to {}".format(beaconId), status=False, yellow=True))
 		establishedSession.relayTask(newTask, beaconId)
 		# Attempt to retrieve a response from the client
 		if config.verbose:
-			print commonUtils.color("Checking {} for a response...".format(beaconId))
+			print(commonUtils.color("Checking {} for a response...".format(beaconId)))
 
 		b_responses = establishedSession.checkForResponse(beaconId)
 		# b_response = establishedSession.checkForResponse(beaconId)
@@ -94,11 +94,11 @@ def main():
 
 	# Import our defined encoder, transport and manager modules
 	if config.verbose:
-		print (commonUtils.color("Importing encoder module: ") + "%s") % (config.ENCODER_MODULE)
+		print((commonUtils.color("Importing encoder module: ") + "%s") % (config.ENCODER_MODULE))
 	importModule(config.ENCODER_MODULE, "encoder")
 	commonUtils.importModule(config.ENCODER_MODULE, "encoder")
 	if config.verbose:
-		print (commonUtils.color("Importing transport module: ") + "%s") % (config.TRANSPORT_MODULE)
+		print((commonUtils.color("Importing transport module: ") + "%s") % (config.TRANSPORT_MODULE))
 	importModule(config.TRANSPORT_MODULE, "transport")
 	commonUtils.importModule(config.TRANSPORT_MODULE, "transport")
 	
@@ -119,17 +119,17 @@ def main():
 					# Tell the socket to begin its task looping
 					t = Thread(target=taskLoop, args=(sock, beaconId))
 					t.daemon = True
-					print "[+] Established new session {}. Staring task loop.".format(beaconId)
+					print("[+] Established new session {}. Staring task loop.".format(beaconId))
 					t.start()
 					# Save conneciton information for a beacon
 					beacons[beaconId] = sock
 			sleep(config.IDLE_TIME)
 	except KeyboardInterrupt:
 		if config.debug:
-			print commonUtils.color("\nClosing the socket connections to the c2 server")
-		for beaconId, socketConnection in beacons.items():
+			print(commonUtils.color("\nClosing the socket connections to the c2 server"))
+		for beaconId, socketConnection in list(beacons.items()):
 			commonUtils.killSocket(socketConnection)
-			print commonUtils.color("\nKilling Beacon {}...".format(beaconId), warning=True)
+			print(commonUtils.color("\nKilling Beacon {}...".format(beaconId), warning=True))
 		sys.exit(0)
 
 main()

